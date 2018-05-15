@@ -1,0 +1,6 @@
+#!/bin/sh
+
+
+ip link set down dev $INTERFACE
+ip addr del {{ tinc_node_address }}/24 $INTERFACE
+

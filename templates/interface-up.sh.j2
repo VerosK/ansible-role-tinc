@@ -1,0 +1,12 @@
+#!/bin/sh
+
+ip addr add  {{ tinc_node_address }}/24 dev $INTERFACE
+ip link set up dev $INTERFACE
+
+{% for node in tinc_nodes %}
+{% if hostvars[node]['tinc_node_name'] != tinc_node_name  %}
+# route to {{ node }}
+ip ro add {{ hostvars[node]['tinc_node_subnet'] }} dev $INTERFACE
+{% endif %}
+{% endfor %}
+

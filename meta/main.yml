@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: VerosK
+  description: Setup simple tinc mesh network
+  company: Team Solutions
+  license: 2-BST
+  min_ansible_version: 2.3
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  categories: []
+dependencies: []
+

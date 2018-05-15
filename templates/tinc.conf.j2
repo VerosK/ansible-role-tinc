@@ -1,0 +1,22 @@
+# ansible managed
+
+# my host name
+Name = {{ tinc_node_name }}
+AddressFamily = ipv4
+#Device = /dev/net/tun
+Port = 1655
+Interface = {{ tinc_interface_name }}
+
+# experimental
+#DirectOnly = yes
+#Forwarding = off
+#
+
+{% for node in tinc_nodes %}
+{% if hostvars[node]['tinc_node_name'] != tinc_node_name  %}
+ConnectTo = {{ hostvars[node]['tinc_node_name'] }}
+{% endif %}
+{% endfor %}
+
+
+# This file is left empty

@@ -1,0 +1,12 @@
+
+tinc_network_name: default
+
+
+tinc_interface_name: tinc-{{tinc_network_name}}
+
+tinc_node_public_address: '{{ ansible_eth0.ipv4.address }}'
+
+#tinc_node_name: node01 #override this for each host
+#tinc_node_address: 10.0.0.1/8 #override this for each host
+
+tinc_nodes: []

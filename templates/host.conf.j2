@@ -1,0 +1,10 @@
+# ansible managed
+# retrieved from {{ node_name }}
+
+Address = {{ hostvars[node_name]['tinc_node_public_address'] }}
+Port = 1655
+Subnet = {{ hostvars[node_name]['tinc_node_subnet'] }}
+
+{% if hostvars[node_name]['tinc_node_public_key']  %}
+{{ hostvars[node_name]['tinc_node_public_key'] }}
+{% endif %}

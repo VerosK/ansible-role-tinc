@@ -1,0 +1,90 @@
+- name: Add tinc daemon
+  package:
+    name: tinc
+    state: present
+
+- name: Prepare tinc network directories
+  file:
+    path: /etc/tinc/{{ tinc_network_name }}/hosts
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create interface scripts
+  template:
+    src: interface-{{ item }}.sh.j2
+    dest: '/etc/tinc/{{ tinc_network_name }}/tinc-{{ item }}'
+    owner: root
+    group: root
+    mode: 0755
+  with_items: [ up, down ]
+  notify: restart tinc
+
+
+- name: Copying tinc network configuration
+  template:
+    src: tinc.conf.j2
+    dest: /etc/tinc/{{ tinc_network_name }}/tinc.conf
+    owner: root
+    group: root
+    mode: 0600
+  notify: restart tinc
+
+- name: Generate private key
+  shell: tincd --generate-keys -n {{ tinc_network_name }} -K 4096
+  args:
+    creates: /etc/tinc/{{ tinc_network_name }}/rsa_key.priv
+
+- name: Retrieve tinc public key
+  tinc_retrieve_public_key:
+    network: '{{ tinc_network_name }}'
+    node_name: '{{ tinc_node_name }}'
+    required: True
+  register: _tinc_key
+  tags: tinc_key
+  changed_when: False
+  when: 'tinc_public_key is not defined'
+
+- set_fact:
+    tinc_public_key: '{{ _tinc_key.key }}'
+  tags: tinc_key
+
+- name: Provide tinc host files
+  template:
+    src: host.conf.j2
+    dest: "/etc/tinc/{{ tinc_network_name }}/hosts/{{ hostvars[node_name]['tinc_node_name'] }}"
+    owner: root
+    group: root
+    mode: 0600
+    backup: yes
+  tags: tinc_key
+  notify: restart tinc
+  with_items: '{{ tinc_nodes }}'
+  loop_control:
+    loop_var: node_name
+
+- name: Create autostart file
+  copy:
+    content: "# tinc Networks to start\n"
+    dest: /etc/tinc/nets.boot
+    force: no # be nice to existing files
+
+- name: Add network to autostart
+  lineinfile:
+    dest: /etc/tinc/nets.boot
+    line: '{{ tinc_network_name }}'
+    regexp: '^#? ?{{ tinc_network_name }}'
+    state: present
+
+
+- name: Make sure tinc will be started
+  service:
+    name: tinc@{{ tinc_network_name }}
+    state: started
+    enabled: true
+
+- name: Make sure tinc master daemon will be autostarted
+  service:
+    name: tinc
+    enabled: true
