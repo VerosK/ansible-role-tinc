@@ -13,8 +13,6 @@ Setup some nodes, add `tinc_ip` host variable to private address. Apply the role
     bubble     tinc_ip=192.168.102.1
     kitty      tinc_ip=192.168.103.1
 
-```
-
 Keypairs are going to be generated on managed machines and downloaded to fact `tinc_node_public_key`
 
 
